@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-navy: #0A0E1A;
+  --color-github: #0D1117;
+  --color-card: #161B27;
+  --color-cyan: #00D9FF;
+  --color-violet: #7C3AED;
+  --color-amber: #F59E0B;
+  --color-text-primary: #F0F6FC;
+  --color-text-muted: #8B949E;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: auto; /* disable smooth scroll — GSAP scrub handles it */
+}
+
+body {
+  background: var(--color-navy);
+  color: var(--color-text-primary);
+  font-family: 'Noto Sans TC', 'Space Grotesk', sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide Remotion player default controls if any leak through */
+[data-remotion-player] button {
+  display: none !important;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Prevent text selection while navigating */
+body {
+  user-select: none;
+}
