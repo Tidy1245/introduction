@@ -1,7 +1,8 @@
-import { Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion'
+import { Img, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
 import { skills } from '../../data/resume'
 import { GlowLine } from '../components/GlowLine'
 import { ProgressBar } from '../components/ProgressBar'
+import { publicAsset } from '../../utils/publicAsset'
 
 export const SceneSkills: React.FC = () => {
   const frame = useCurrentFrame()
@@ -133,7 +134,7 @@ export const SceneSkills: React.FC = () => {
                       }}
                     >
                       <Img
-                        src={staticFile(skill.iconAsset)}
+                        src={publicAsset(skill.iconAsset)}
                         style={{
                           width: '100%',
                           height: '100%',

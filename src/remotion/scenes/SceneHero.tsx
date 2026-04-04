@@ -1,6 +1,7 @@
-import { Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion'
+import { Img, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
 import { personal } from '../../data/resume'
 import { AnimatedText } from '../components/AnimatedText'
+import { publicAsset } from '../../utils/publicAsset'
 
 // Subtle dot-grid background
 const DotGrid: React.FC = () => (
@@ -116,7 +117,7 @@ export const SceneHero: React.FC = () => {
           }}
         >
           <Img
-            src={staticFile('avatar.jpg')}
+            src={publicAsset('avatar.jpg')}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             onError={() => {}}
           />
