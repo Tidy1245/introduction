@@ -1,4 +1,4 @@
-import { Img, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
+import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
 import { skills } from '../../data/resume'
 import { GlowLine } from '../components/GlowLine'
 import { ProgressBar } from '../components/ProgressBar'
@@ -133,7 +133,7 @@ export const SceneSkills: React.FC = () => {
                         flexShrink: 0,
                       }}
                     >
-                      <Img
+                      <img
                         src={publicAsset(skill.iconAsset)}
                         style={{
                           width: '100%',

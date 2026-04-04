@@ -1,4 +1,4 @@
-import { Img, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
+import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
 import { personal } from '../../data/resume'
 import { AnimatedText } from '../components/AnimatedText'
 import { publicAsset } from '../../utils/publicAsset'
@@ -116,7 +116,7 @@ export const SceneHero: React.FC = () => {
             fontSize: 48,
           }}
         >
-          <Img
+          <img
             src={publicAsset('avatar.jpg')}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             onError={() => {}}
