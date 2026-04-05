@@ -100,16 +100,16 @@ export const SceneNav: React.FC<Props> = ({ currentScene, onNavigate }) => {
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                opacity: isActive ? 1 : 0,
-                transform: isActive ? 'translateX(0)' : 'translateX(-6px)',
-                transition: 'opacity 0.25s ease, transform 0.25s ease',
+                opacity: 1,
+                transform: 'translateX(0)',
+                transition: 'color 0.25s ease',
                 pointerEvents: 'none',
               }}
               className="scene-label"
             >
               <span
                 style={{
-                  fontSize: 12,
+                  fontSize: 13,
                   fontWeight: 600,
                   color: isActive ? '#00D9FF' : '#8B949E',
                   fontFamily: '"Noto Sans TC", sans-serif',
@@ -121,8 +121,8 @@ export const SceneNav: React.FC<Props> = ({ currentScene, onNavigate }) => {
               </span>
               <span
                 style={{
-                  fontSize: 9,
-                  color: '#8B949E',
+                  fontSize: 10,
+                  color: isActive ? 'rgba(0,217,255,0.75)' : '#8B949E',
                   fontFamily: '"JetBrains Mono", monospace',
                   letterSpacing: 1,
                   lineHeight: 1.2,
@@ -135,13 +135,6 @@ export const SceneNav: React.FC<Props> = ({ currentScene, onNavigate }) => {
         )
       })}
 
-      {/* Show label on hover */}
-      <style>{`
-        nav [role="button"]:hover .scene-label {
-          opacity: 1 !important;
-          transform: translateX(0) !important;
-        }
-      `}</style>
     </nav>
   )
 }

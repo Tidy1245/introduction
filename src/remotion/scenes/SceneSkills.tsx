@@ -1,7 +1,6 @@
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
 import { skills } from '../../data/resume'
 import { GlowLine } from '../components/GlowLine'
-import { ProgressBar } from '../components/ProgressBar'
 import { publicAsset } from '../../utils/publicAsset'
 
 export const SceneSkills: React.FC = () => {
@@ -157,17 +156,10 @@ export const SceneSkills: React.FC = () => {
                   </span>
                 </div>
 
-                {/* Progress bar */}
-                <ProgressBar
-                  skill={skill}
-                  startFrame={cardStartFrame + 4}
-                  durationInFrames={8}
-                />
-
                 {/* Description */}
                 <div
                   style={{
-                    marginTop: 8,
+                    marginTop: 4,
                     fontSize: 11,
                     color: '#8B949E',
                     fontFamily: '"Noto Sans TC", sans-serif',
