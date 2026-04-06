@@ -1,6 +1,38 @@
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
+import { useLayoutEffect, useState } from 'react'
 import { projects } from '../../data/resume'
 import { GlowLine } from '../components/GlowLine'
+
+const VISIBLE_PROJECTS = 3
+const CARD_WIDTH = 352
+const CARD_GAP = 16
+const TRACK_STEP = CARD_WIDTH + CARD_GAP
+const VIEWPORT_WIDTH = CARD_WIDTH * VISIBLE_PROJECTS + CARD_GAP * (VISIBLE_PROJECTS - 1)
+const TRACK_SETTLE_OFFSET = -TRACK_STEP
+const TRACK_RIGHT_START_OFFSET = 0
+const TRACK_LEFT_START_OFFSET = -TRACK_STEP * 2
+
+const wrapIndex = (index: number, length: number) => {
+  if (length === 0) return 0
+  return (index % length + length) % length
+}
+
+const hexToRgba = (hex: string, alpha: number) => {
+  const normalized = hex.replace('#', '')
+  const hexValue =
+    normalized.length === 3
+      ? normalized
+          .split('')
+          .map((char) => char + char)
+          .join('')
+      : normalized
+
+  const r = Number.parseInt(hexValue.slice(0, 2), 16)
+  const g = Number.parseInt(hexValue.slice(2, 4), 16)
+  const b = Number.parseInt(hexValue.slice(4, 6), 16)
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
 
 const ProjectCard: React.FC<{
   project: (typeof projects)[0]
@@ -35,7 +67,6 @@ const ProjectCard: React.FC<{
     transform = `translateY(${y}px)`
   }
 
-  // Count-up for accuracy numbers (only for LSTM project)
   const accuracyNum = interpolate(elapsed - 12, [0, 12], [0, 85.69], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
@@ -52,19 +83,20 @@ const ProjectCard: React.FC<{
         ['--project-accent' as string]: project.accentColor,
         opacity,
         transform,
-        background: '#161B27',
+        width: CARD_WIDTH,
+        minHeight: 314,
+        background: `linear-gradient(180deg, ${hexToRgba(project.accentColor, 0.14)} 0%, ${hexToRgba(project.accentColor, 0.04)} 24%, #161B27 100%)`,
         border: `1px solid ${project.accentColor}25`,
         borderTop: `2px solid ${project.accentColor}`,
         borderRadius: 12,
         padding: '20px 22px',
-        flex: 1,
-        boxShadow: `0 0 30px ${project.accentColor}08`,
+        flexShrink: 0,
+        boxShadow: `0 18px 38px ${hexToRgba(project.accentColor, 0.1)}`,
         textDecoration: 'none',
         cursor: project.linkUrl ? 'pointer' : 'default',
         transition: 'box-shadow 0.22s ease, border-color 0.22s ease, transform 0.22s ease',
       }}
     >
-      {/* Title */}
       <div style={{ marginBottom: 8 }}>
         <div
           style={{
@@ -88,7 +120,6 @@ const ProjectCard: React.FC<{
         </div>
       </div>
 
-      {/* Description */}
       <div
         style={{
           fontSize: 12,
@@ -101,21 +132,21 @@ const ProjectCard: React.FC<{
         {project.description}
       </div>
 
-      {/* Highlights */}
       <div style={{ marginBottom: 12 }}>
-        {project.highlights.map((h, i) => {
-          const hOpacity = interpolate(elapsed - 10 - i * 4, [0, 8], [0, 1], {
+        {project.highlights.map((highlight, index) => {
+          const hOpacity = interpolate(elapsed - 10 - index * 4, [0, 8], [0, 1], {
             extrapolateLeft: 'clamp',
             extrapolateRight: 'clamp',
           })
-          // Replace static accuracy with count-up for LSTM project
+
           const displayText =
-            project.title.includes('LSTM') && h.includes('85.69')
+            project.title.includes('LSTM') && highlight.includes('85.69')
               ? `LSTM 5分鐘準確率 ${accuracyNum.toFixed(2)}%`
-              : h
+              : highlight
+
           return (
             <div
-              key={h}
+              key={highlight}
               style={{
                 display: 'flex',
                 gap: 8,
@@ -138,8 +169,14 @@ const ProjectCard: React.FC<{
         })}
       </div>
 
-      {/* Tech stack */}
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: project.githubUrl ? 10 : 0 }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: 6,
+          flexWrap: 'wrap',
+          marginBottom: project.githubUrl ? 10 : 0,
+        }}
+      >
         {project.techStack.map((tech) => (
           <span
             key={tech}
@@ -158,7 +195,6 @@ const ProjectCard: React.FC<{
         ))}
       </div>
 
-      {/* GitHub link */}
       {(project.githubUrl || project.linkUrl) && (
         <div
           style={{
@@ -179,12 +215,68 @@ const ProjectCard: React.FC<{
   )
 }
 
-export const SceneProjects: React.FC = () => {
+type SceneProjectsProps = {
+  projectStartIndex?: number
+  projectDirection?: 1 | -1
+  projectMotionKey?: number
+}
+
+export const SceneProjects: React.FC<SceneProjectsProps> = ({
+  projectStartIndex = 0,
+  projectDirection = 1,
+  projectMotionKey = 0,
+}) => {
   const frame = useCurrentFrame()
+  const totalProjects = projects.length
+  const safeStartIndex = wrapIndex(projectStartIndex, totalProjects)
+  const activeAccent = projects[safeStartIndex]?.accentColor ?? '#00D9FF'
+  const [bufferStartIndex, setBufferStartIndex] = useState(safeStartIndex - 1)
+  const [trackOffset, setTrackOffset] = useState(TRACK_SETTLE_OFFSET)
+  const [trackTransition, setTrackTransition] = useState('none')
+  const currentProjectNumber = safeStartIndex + 1
 
   const headingOpacity = interpolate(frame, [30, 42], [0, 1], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
+  })
+
+  useLayoutEffect(() => {
+    setBufferStartIndex(safeStartIndex - 1)
+    setTrackTransition('none')
+
+    if (projectMotionKey === 0) {
+      setTrackOffset(TRACK_SETTLE_OFFSET)
+      return
+    }
+
+    const initialOffset =
+      projectDirection === 1 ? TRACK_RIGHT_START_OFFSET : TRACK_LEFT_START_OFFSET
+
+    setTrackOffset(initialOffset)
+
+    let rafOne = 0
+    let rafTwo = 0
+
+    rafOne = window.requestAnimationFrame(() => {
+      rafTwo = window.requestAnimationFrame(() => {
+        setTrackTransition('transform 520ms cubic-bezier(0.16, 1, 0.3, 1)')
+        setTrackOffset(TRACK_SETTLE_OFFSET)
+      })
+    })
+
+    return () => {
+      window.cancelAnimationFrame(rafOne)
+      window.cancelAnimationFrame(rafTwo)
+    }
+  }, [projectDirection, projectMotionKey, safeStartIndex])
+
+  const bufferedProjects = Array.from({ length: VISIBLE_PROJECTS + 2 }, (_, index) => {
+    const projectIndex = wrapIndex(bufferStartIndex + index, totalProjects)
+    return {
+      key: `${projectIndex}-${index}-${projectMotionKey}`,
+      project: projects[projectIndex],
+      projectIndex,
+    }
   })
 
   return (
@@ -201,7 +293,6 @@ export const SceneProjects: React.FC = () => {
         padding: '0 60px',
       }}
     >
-      {/* Background */}
       <div
         style={{
           position: 'absolute',
@@ -213,7 +304,6 @@ export const SceneProjects: React.FC = () => {
       />
 
       <div style={{ position: 'relative', width: '100%', maxWidth: 1100 }}>
-        {/* Heading */}
         <div style={{ opacity: headingOpacity, marginBottom: 8 }}>
           <div
             style={{
@@ -240,14 +330,132 @@ export const SceneProjects: React.FC = () => {
         </div>
 
         <div style={{ marginBottom: 24 }}>
-          <GlowLine startFrame={34} durationInFrames={18} />
+          <GlowLine startFrame={34} durationInFrames={18} color={activeAccent} />
         </div>
 
-        {/* Three project cards */}
-        <div style={{ display: 'flex', gap: 16 }}>
-          <ProjectCard project={projects[0]} startFrame={34} slideFrom="left" />
-          <ProjectCard project={projects[1]} startFrame={46} slideFrom="bottom" />
-          <ProjectCard project={projects[2]} startFrame={58} slideFrom="right" />
+        <div
+          style={{
+            opacity: headingOpacity,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 18,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 11,
+              color: '#8B949E',
+              fontFamily: '"JetBrains Mono", monospace',
+              letterSpacing: 1.2,
+            }}
+          >
+            LOOP CAROUSEL
+          </div>
+          <div
+            style={{
+              fontSize: 11,
+              color: activeAccent,
+              fontFamily: '"JetBrains Mono", monospace',
+              letterSpacing: 1.2,
+            }}
+          >
+            {String(currentProjectNumber).padStart(2, '0')} / {String(totalProjects).padStart(2, '0')}
+          </div>
+        </div>
+
+        <div
+          style={{
+            width: VIEWPORT_WIDTH,
+            overflow: 'hidden',
+            position: 'relative',
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              left: 0,
+              width: 28,
+              zIndex: 2,
+              pointerEvents: 'none',
+              background: 'linear-gradient(90deg, rgba(13,17,23,0.42) 0%, rgba(13,17,23,0) 100%)',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              right: 0,
+              width: 28,
+              zIndex: 2,
+              pointerEvents: 'none',
+              background: 'linear-gradient(270deg, rgba(13,17,23,0.42) 0%, rgba(13,17,23,0) 100%)',
+            }}
+          />
+          <div
+            style={{
+              display: 'flex',
+              gap: CARD_GAP,
+              transform: `translate3d(${trackOffset}px, 0, 0)`,
+              transition: trackTransition,
+              willChange: 'transform',
+            }}
+          >
+            {bufferedProjects.map(({ key, project, projectIndex }, index) => (
+              <ProjectCard
+                key={key}
+                project={project}
+                startFrame={34 + projectIndex * 6}
+                slideFrom={index % 3 === 0 ? 'left' : index % 3 === 1 ? 'bottom' : 'right'}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div
+          style={{
+            opacity: headingOpacity,
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 10,
+            marginTop: 18,
+          }}
+        >
+          {Array.from({ length: totalProjects }).map((_, index) => (
+            <div
+              key={index}
+              style={{
+                width: index === safeStartIndex ? 26 : 8,
+                height: 8,
+                borderRadius: 999,
+                background: index === safeStartIndex ? activeAccent : 'rgba(139,148,158,0.3)',
+                boxShadow:
+                  index === safeStartIndex ? `0 0 14px ${hexToRgba(activeAccent, 0.45)}` : 'none',
+                transition: 'all 0.22s ease',
+              }}
+            />
+          ))}
+        </div>
+
+        <div
+          style={{
+            position: 'absolute',
+            left: '50%',
+            bottom: -52,
+            transform: 'translateX(-50%)',
+            opacity: headingOpacity,
+            fontSize: 12,
+            color: '#8B949E',
+            fontFamily: '"Noto Sans TC", sans-serif',
+            letterSpacing: 0.8,
+            textAlign: 'center',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          左右滑動或方向鍵←→檢視
         </div>
       </div>
 

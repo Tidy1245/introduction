@@ -1,7 +1,7 @@
 import { Player, type PlayerRef } from '@remotion/player'
 import { gsap } from 'gsap'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { RESUME_CONSTANTS, SCENE_SNAPS } from './data/resume'
+import { RESUME_CONSTANTS, SCENE_SNAPS, projects } from './data/resume'
 import { ResumeComposition } from './remotion/ResumeComposition'
 import { SceneNav } from './components/SceneNav'
 
@@ -15,6 +15,8 @@ const NAV_EASE = 'power2.inOut'
 const HERO_AUTOPLAY_TO = 90
 const HERO_AUTOPLAY_DURATION = 1.6
 const TRANSITION_FRAMES = 30
+const PROJECTS_SCENE_INDEX = SCENE_SNAPS.findIndex((scene) => scene.key === 'projects')
+const TOTAL_PROJECTS = projects.length
 
 const getSceneIndexForFrame = (frame: number) => {
   let sceneIndex = 0
@@ -36,7 +38,35 @@ export default function App() {
   const isNavigating = useRef(false)
   const tweenRef = useRef<gsap.core.Tween | null>(null)
   const autoplayDelayRef = useRef<number | null>(null)
+  const projectStartIndexRef = useRef(0)
   const [currentScene, setCurrentScene] = useState(() => getSceneIndexForFrame(0))
+  const [projectStartIndex, setProjectStartIndex] = useState(0)
+  const [projectDirection, setProjectDirection] = useState<1 | -1>(1)
+  const [projectMotionKey, setProjectMotionKey] = useState(0)
+
+  const resetProjectWindow = useCallback(() => {
+    projectStartIndexRef.current = 0
+    setProjectStartIndex(0)
+    setProjectDirection(1)
+    setProjectMotionKey(0)
+  }, [])
+
+  const shiftProjectWindow = useCallback(
+    (direction: 1 | -1) => {
+      if (currentScene !== PROJECTS_SCENE_INDEX || TOTAL_PROJECTS <= 1) {
+        return false
+      }
+
+      const nextIndex = (projectStartIndexRef.current + direction + TOTAL_PROJECTS) % TOTAL_PROJECTS
+
+      projectStartIndexRef.current = nextIndex
+      setProjectDirection(direction)
+      setProjectStartIndex(nextIndex)
+      setProjectMotionKey((currentKey) => currentKey + 1)
+      return true
+    },
+    [currentScene],
+  )
 
   const syncFrame = useCallback((frame: number) => {
     const roundedFrame = Math.round(frame)
@@ -103,16 +133,24 @@ export default function App() {
       if (isNavigating.current) return
       if (sceneIndex < 0 || sceneIndex >= SCENE_SNAPS.length) return
 
+      if (sceneIndex === PROJECTS_SCENE_INDEX && currentScene !== PROJECTS_SCENE_INDEX) {
+        resetProjectWindow()
+      }
+
       const targetFrame = SCENE_SNAPS[sceneIndex].settleFrame
       playToFrame(targetFrame, NAV_LOCK_MS / 1000, NAV_EASE)
     },
-    [playToFrame],
+    [currentScene, playToFrame, resetProjectWindow],
   )
 
   const navigateFromNav = useCallback(
     (sceneIndex: number) => {
       if (isNavigating.current) return
       if (sceneIndex < 0 || sceneIndex >= SCENE_SNAPS.length) return
+
+      if (sceneIndex === PROJECTS_SCENE_INDEX && currentScene !== PROJECTS_SCENE_INDEX) {
+        resetProjectWindow()
+      }
 
       const activeScene = getSceneIndexForFrame(currentFrameRef.current)
       const distance = Math.abs(sceneIndex - activeScene)
@@ -136,7 +174,7 @@ export default function App() {
         })
       })
     },
-    [getSceneExitFrame, navigateTo, runFrameAnimation, syncFrame],
+    [currentScene, getSceneExitFrame, navigateTo, resetProjectWindow, runFrameAnimation, syncFrame],
   )
 
   // ── Auto-play hero on mount ───────────────────────────────────────────────
@@ -163,8 +201,27 @@ export default function App() {
     const onWheel = (e: WheelEvent) => {
       e.preventDefault()
       if (wheelCooldown || isNavigating.current) return
+
+      const isHorizontalGesture =
+        currentScene === PROJECTS_SCENE_INDEX &&
+        Math.abs(e.deltaX) > Math.abs(e.deltaY) &&
+        Math.abs(e.deltaX) > 24
+
+      if (isHorizontalGesture) {
+        const handled = shiftProjectWindow(e.deltaX > 0 ? 1 : -1)
+        if (handled) {
+          wheelCooldown = true
+          setTimeout(() => {
+            wheelCooldown = false
+          }, 280)
+        }
+        return
+      }
+
       wheelCooldown = true
-      setTimeout(() => { wheelCooldown = false }, NAV_LOCK_MS + 100)
+      setTimeout(() => {
+        wheelCooldown = false
+      }, NAV_LOCK_MS + 100)
 
       if (e.deltaY > 0) navigateTo(currentScene + 1)
       else navigateTo(currentScene - 1)
@@ -172,12 +229,18 @@ export default function App() {
 
     window.addEventListener('wheel', onWheel, { passive: false })
     return () => window.removeEventListener('wheel', onWheel)
-  }, [currentScene, navigateTo])
+  }, [currentScene, navigateTo, shiftProjectWindow])
 
   // ── Keyboard navigation ───────────────────────────────────────────────────
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+      if (currentScene === PROJECTS_SCENE_INDEX && e.key === 'ArrowLeft') {
+        e.preventDefault()
+        shiftProjectWindow(-1)
+      } else if (currentScene === PROJECTS_SCENE_INDEX && e.key === 'ArrowRight') {
+        e.preventDefault()
+        shiftProjectWindow(1)
+      } else if (e.key === 'ArrowDown' || e.key === 'PageDown') {
         e.preventDefault()
         navigateTo(currentScene + 1)
       } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
@@ -187,16 +250,29 @@ export default function App() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [currentScene, navigateTo])
+  }, [currentScene, navigateTo, shiftProjectWindow])
 
   // ── Touch navigation ──────────────────────────────────────────────────────
   useEffect(() => {
+    let touchStartX = 0
     let touchStartY = 0
     const onTouchStart = (e: TouchEvent) => {
+      touchStartX = e.touches[0].clientX
       touchStartY = e.touches[0].clientY
     }
     const onTouchEnd = (e: TouchEvent) => {
+      const dx = touchStartX - e.changedTouches[0].clientX
       const dy = touchStartY - e.changedTouches[0].clientY
+
+      if (
+        currentScene === PROJECTS_SCENE_INDEX &&
+        Math.abs(dx) > Math.abs(dy) &&
+        Math.abs(dx) >= 40
+      ) {
+        shiftProjectWindow(dx > 0 ? 1 : -1)
+        return
+      }
+
       if (Math.abs(dy) < 40) return // ignore small swipes
       if (dy > 0) navigateTo(currentScene + 1)
       else navigateTo(currentScene - 1)
@@ -207,7 +283,7 @@ export default function App() {
       window.removeEventListener('touchstart', onTouchStart)
       window.removeEventListener('touchend', onTouchEnd)
     }
-  }, [currentScene, navigateTo])
+  }, [currentScene, navigateTo, shiftProjectWindow])
 
   return (
     <div
@@ -223,6 +299,7 @@ export default function App() {
       <Player
         ref={playerRef}
         component={ResumeComposition}
+        inputProps={{ projectStartIndex, projectDirection, projectMotionKey }}
         durationInFrames={TOTAL_FRAMES}
         fps={FPS}
         compositionWidth={COMPOSITION_WIDTH}

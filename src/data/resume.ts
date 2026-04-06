@@ -106,19 +106,30 @@ export const personal: PersonalInfo = {
   location: '新北市新莊區',
   github: 'https://github.com/Tidy1245',
   avatarUrl: '/avatar.jpg',
-  tags: ['細心', '理性客觀', '演算法', '機器學習', '邏輯推理'],
+  tags: ['細心', 'Harness Engineering', '演算法', '機器學習', '邏輯推理'],
   bio: '細心沉穩，有一個誠懇學習的心，擅用AI學習各方面應用和技術，能配合團隊、樂於自我提升。',
 }
 
-export const education: Education = {
-  schoolZh: '國立東華大學',
-  schoolEn: 'National Dong Hwa University',
-  degreeZh: '資訊工程學系 碩士',
-  degreeEn: 'M.S. Computer Science & Information Engineering',
-  period: '2023/9 — 2025/6',
-  startYear: 2023,
-  endYear: 2025,
-}
+export const education: Education[] = [
+  {
+    schoolZh: '國立東華大學',
+    schoolEn: 'National Dong Hwa University',
+    degreeZh: '資訊工程學系 學士',
+    degreeEn: 'B.S. Computer Science & Information Engineering',
+    period: '2019/9 — 2023/6',
+    startYear: 2019,
+    endYear: 2023,
+  },
+  {
+    schoolZh: '國立東華大學',
+    schoolEn: 'National Dong Hwa University',
+    degreeZh: '資訊工程學系 碩士',
+    degreeEn: 'M.S. Computer Science & Information Engineering',
+    period: '2023/9 — 2025/6',
+    startYear: 2023,
+    endYear: 2025,
+  },
+]
 
 export const experiences: WorkExperience[] = [
   {
@@ -134,7 +145,7 @@ export const experiences: WorkExperience[] = [
       '支援其他專案小組開發',
     ],
     tags: ['Python', 'AI', '深度學習', '模組化系統設計'],
-    logoColor: '#4F8EF7',
+    logoColor: '#00D9FF',
   },
   {
     company: '國立東華大學智慧型系統實驗室',
@@ -147,7 +158,7 @@ export const experiences: WorkExperience[] = [
       '實驗室伺服器網路管理',
     ],
     tags: ['Python', 'Linux', '資料處理'],
-    logoColor: '#E07B39',
+    logoColor: '#00D9FF',
   },
 ]
 
@@ -219,6 +230,40 @@ export const projects: Project[] = [
     accentColor: '#00D9FF',
   },
   {
+    title: 'voice-ai',
+    titleEn: 'AI Voice Workflow Prototype',
+    period: '2025',
+    description:
+      'AI 語音應用原型，聚焦語音模型串接、互動流程設計與產品化展示，將語音能力整合為可操作的工具介面。',
+    highlights: [
+      '語音模型整合流程',
+      'TTS / 語音互動體驗',
+      '產品原型與介面設計',
+    ],
+    techStack: ['Python', 'TTS', 'AI Workflow', 'Web UI'],
+    githubUrl: 'https://github.com/Tidy1245/voice-ai',
+    linkUrl: 'https://github.com/Tidy1245/voice-ai',
+    linkLabel: 'Open GitHub',
+    accentColor: '#34D399',
+  },
+  {
+    title: 'Video-Box',
+    titleEn: 'Mobile Video Viewer',
+    period: '2025',
+    description:
+      '為手機使用情境設計的影片檢視器，支援本地影片匯入、橫向與直向內容分流、Shorts 式滑動播放，以及離線媒體瀏覽。',
+    highlights: [
+      'IndexedDB + Dexie 儲存本地影片 Blob',
+      'Shorts 式全螢幕上下滑動播放',
+      'PWA 與 Capacitor Android 打包',
+    ],
+    techStack: ['Vue 3', 'TypeScript', 'Dexie', 'PWA', 'Capacitor'],
+    githubUrl: 'https://github.com/Tidy1245/Video-Box',
+    linkUrl: 'https://github.com/Tidy1245/Video-Box',
+    linkLabel: 'Open GitHub',
+    accentColor: '#F97316',
+  },
+  {
     title: '碩士論文 LSTM / BiLSTM',
     titleEn: 'Vehicular Network Bandwidth Prediction',
     period: '2024/3 — 2025/1',
@@ -232,7 +277,7 @@ export const projects: Project[] = [
     techStack: ['Python', 'TensorFlow', 'LSTM', 'BiLSTM', 'YouTube API'],
     linkUrl: 'https://hdl.handle.net/11296/r7k9z3',
     linkLabel: 'Open Thesis',
-    accentColor: '#7C3AED',
+    accentColor: '#8B5CF6',
   },
   {
     title: '一番賞智能合約',

@@ -12,7 +12,17 @@ import { SceneSkills } from './scenes/SceneSkills'
 
 const TRANSITION_FRAMES = 30
 
-export const ResumeComposition: React.FC = () => {
+type ResumeCompositionProps = {
+  projectStartIndex?: number
+  projectDirection?: 1 | -1
+  projectMotionKey?: number
+}
+
+export const ResumeComposition: React.FC<ResumeCompositionProps> = ({
+  projectStartIndex = 0,
+  projectDirection = 1,
+  projectMotionKey = 0,
+}) => {
   return (
     <TransitionSeries>
       {/* Scene 1: Hero — 120 frames */}
@@ -67,7 +77,11 @@ export const ResumeComposition: React.FC = () => {
 
       {/* Scene 6: Projects — 120 frames */}
       <TransitionSeries.Sequence durationInFrames={120}>
-        <SceneProjects />
+        <SceneProjects
+          projectStartIndex={projectStartIndex}
+          projectDirection={projectDirection}
+          projectMotionKey={projectMotionKey}
+        />
       </TransitionSeries.Sequence>
     </TransitionSeries>
   )

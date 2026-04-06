@@ -35,12 +35,13 @@ export const TimelineCard: React.FC<Props> = ({
       style={{
         opacity,
         transform: `translateX(${translateX}px)`,
-        background: '#161B27',
+        background: `linear-gradient(180deg, ${experience.logoColor}14 0%, ${experience.logoColor}05 24%, #161B27 100%)`,
         border: `1px solid ${experience.logoColor}30`,
         borderLeft: `3px solid ${experience.logoColor}`,
         borderRadius: 12,
         padding: '20px 24px',
         flex: 1,
+        boxShadow: `0 18px 40px ${experience.logoColor}1A`,
       }}
     >
       {/* Header */}

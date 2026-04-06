@@ -31,7 +31,7 @@ export const SceneExperience: React.FC = () => {
           position: 'absolute',
           inset: 0,
           backgroundImage:
-            'linear-gradient(rgba(79,142,247,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(79,142,247,0.04) 1px, transparent 1px)',
+            'linear-gradient(rgba(0,217,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,217,255,0.04) 1px, transparent 1px)',
           backgroundSize: '80px 80px',
         }}
       />
@@ -42,7 +42,7 @@ export const SceneExperience: React.FC = () => {
           <div
             style={{
               fontSize: 13,
-              color: '#4F8EF7',
+              color: '#00D9FF',
               fontFamily: '"JetBrains Mono", monospace',
               letterSpacing: 4,
               textTransform: 'uppercase',
@@ -64,7 +64,7 @@ export const SceneExperience: React.FC = () => {
         </div>
 
         <div style={{ marginBottom: 28 }}>
-          <GlowLine startFrame={34} color="#4F8EF7" durationInFrames={16} />
+          <GlowLine startFrame={34} color="#00D9FF" durationInFrames={16} />
         </div>
 
         {/* Two-column cards */}
