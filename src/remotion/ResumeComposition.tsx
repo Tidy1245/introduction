@@ -6,6 +6,7 @@ import { wipe } from '@remotion/transitions/wipe'
 import { SceneAbout } from './scenes/SceneAbout'
 import { SceneEducation } from './scenes/SceneEducation'
 import { SceneExperience } from './scenes/SceneExperience'
+import { SceneFuture } from './scenes/SceneFuture'
 import { SceneHero } from './scenes/SceneHero'
 import { SceneProjects } from './scenes/SceneProjects'
 import { SceneSkills } from './scenes/SceneSkills'
@@ -82,6 +83,15 @@ export const ResumeComposition: React.FC<ResumeCompositionProps> = ({
           projectDirection={projectDirection}
           projectMotionKey={projectMotionKey}
         />
+      </TransitionSeries.Sequence>
+
+      <TransitionSeries.Transition
+        presentation={slide({ direction: 'from-right' })}
+        timing={springTiming({ config: { damping: 200 }, durationInFrames: TRANSITION_FRAMES })}
+      />
+
+      <TransitionSeries.Sequence durationInFrames={90}>
+        <SceneFuture />
       </TransitionSeries.Sequence>
     </TransitionSeries>
   )

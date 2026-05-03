@@ -1,9 +1,9 @@
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 // Total frames = sum(scene durations) - sum(transition overlaps)
-// = (120+90+90+90+90+120) - (5×30) = 600 - 150 = 450
+// = (120+90+90+90+90+120+90) - (6×30) = 690 - 180 = 510
 export const RESUME_CONSTANTS = {
-  TOTAL_FRAMES: 450,
+  TOTAL_FRAMES: 510,
   FPS: 30,
   COMPOSITION_WIDTH: 1280,
   COMPOSITION_HEIGHT: 720,
@@ -31,6 +31,7 @@ export const SCENE_SNAPS: SceneSnap[] = [
   { key: 'experience', label: '經歷', labelEn: 'Experience', frame: 240, settleFrame: 268 },
   { key: 'skills',     label: '專長', labelEn: 'Skills',     frame: 300, settleFrame: 328 },
   { key: 'projects',   label: '專案', labelEn: 'Projects',   frame: 360, settleFrame: 420 },
+  { key: 'future',     label: '規劃', labelEn: 'Future',     frame: 450, settleFrame: 478 },
 ]
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -90,6 +91,13 @@ export type Project = {
   githubUrl?: string
   linkUrl?: string
   linkLabel?: string
+  accentColor: string
+}
+
+export type FuturePlan = {
+  range: string
+  title: string
+  focus: string[]
   accentColor: string
 }
 
@@ -194,12 +202,12 @@ export const skills: Skill[] = [
     icon: '🐧',
   },
   {
-    name: 'Git',
+    name: 'ComfyUI',
     level: 75,
-    tags: ['GitHub'],
-    description: '基本指令、版本控制',
+    tags: ['AI Image', 'Workflow'],
+    description: 'AI文生圖、圖片編輯',
     icon: '🔀',
-    iconAsset: 'skill-icons/git.png',
+    iconAsset: 'skill-icons/comfyui.png',
   },
   {
     name: 'Solidity',
@@ -293,6 +301,21 @@ export const projects: Project[] = [
     techStack: ['Solidity', 'Ethereum', 'ERC-721'],
     linkUrl: 'https://youtu.be/kWvvfLG-Nig',
     linkLabel: 'Watch Demo',
+    accentColor: '#F59E0B',
+  },
+]
+
+export const futurePlans: FuturePlan[] = [
+  {
+    range: '1~2 年',
+    title: '累積工作經驗',
+    focus: ['掌握各種 AI 應用', '研究系統設計', '研究使用者體驗'],
+    accentColor: '#00D9FF',
+  },
+  {
+    range: '2~5 年',
+    title: 'AI 應用規劃',
+    focus: ['全端開發管理', '開發獨立遊戲'],
     accentColor: '#F59E0B',
   },
 ]
